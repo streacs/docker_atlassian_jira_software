@@ -3,18 +3,25 @@ package com.streacs.java;
 import com.atlassian.bamboo.specs.api.BambooSpec;
 import com.atlassian.bamboo.specs.api.builders.plan.Plan;
 import com.atlassian.bamboo.specs.api.builders.plan.PlanIdentifier;
+import com.atlassian.bamboo.specs.api.builders.plan.branches.PlanBranchManagement;
 import com.atlassian.bamboo.specs.api.builders.project.Project;
+import com.atlassian.bamboo.specs.api.builders.repository.VcsRepositoryIdentifier;
+import com.atlassian.bamboo.specs.api.builders.requirement.Requirement;
+import com.atlassian.bamboo.specs.builders.task.CheckoutItem;
+import com.atlassian.bamboo.specs.builders.task.VcsCheckoutTask;
+import com.atlassian.bamboo.specs.builders.trigger.BitbucketServerTrigger;
+import com.atlassian.bamboo.specs.model.task.ScriptTaskProperties;
 import com.atlassian.bamboo.specs.util.BambooServer;
+import com.atlassian.bamboo.specs.api.builders.plan.Stage;
+import com.atlassian.bamboo.specs.api.builders.plan.Job;
+import com.atlassian.bamboo.specs.builders.task.ScriptTask;
+import com.atlassian.bamboo.specs.builders.trigger.ScheduledTrigger;
 import com.atlassian.bamboo.specs.api.builders.permission.Permissions;
 import com.atlassian.bamboo.specs.api.builders.permission.PermissionType;
 import com.atlassian.bamboo.specs.api.builders.permission.PlanPermissions;
-import com.atlassian.bamboo.specs.api.builders.plan.Job;
-import com.atlassian.bamboo.specs.api.builders.plan.Stage;
-import com.atlassian.bamboo.specs.api.builders.plan.artifact.Artifact;
-import com.atlassian.bamboo.specs.api.builders.repository.VcsRepository;
-import com.atlassian.bamboo.specs.builders.repository.git.GitRepository;
-import com.atlassian.bamboo.specs.builders.task.ScriptTask;
-import com.atlassian.bamboo.specs.builders.task.VcsCheckoutTask;
+
+import java.time.LocalTime;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Plan configuration for Bamboo.
@@ -28,7 +35,7 @@ public class PlanSpec {
      */
     public static void main(final String[] args) throws Exception {
         //By default credentials are read from the '.credentials' file.
-        BambooServer bambooServer = new BambooServer("http://localhost:8085");
+        BambooServer bambooServer = new BambooServer("https://build.streacs.com");
 
         Plan plan = new PlanSpec().createPlan();
 
@@ -41,61 +48,77 @@ public class PlanSpec {
 
     PlanPermissions createPlanPermission(PlanIdentifier planIdentifier) {
         Permissions permission = new Permissions()
-                .userPermissions("admin", PermissionType.ADMIN, PermissionType.CLONE, PermissionType.EDIT)
-                .groupPermissions("bamboo-admin", PermissionType.ADMIN)
-                .loggedInUserPermissions(PermissionType.VIEW)
-                .anonymousUserPermissionView();
+            .userPermissions("sysadmin", PermissionType.ADMIN, PermissionType.CLONE, PermissionType.EDIT)
+            .groupPermissions("crowd-administrators", PermissionType.ADMIN)
+            .loggedInUserPermissions(PermissionType.VIEW)
+            .anonymousUserPermissionView();
         return new PlanPermissions(planIdentifier.getProjectKey(), planIdentifier.getPlanKey()).permissions(permission);
     }
 
     Project project() {
         return new Project()
-                .name("Project Name")
-                .key("PRJ");
+            .name("Docker Containers")
+            .key("DCK");
     }
 
     Plan createPlan() {
         return new Plan(
-                project(),
-                "Plan Name", "PLANKEY")
-                .description("Plan created from (enter repository url of your plan)")
-                .planRepositories(
-                        gitRepository()
-                )
-                .stages(
-                        new Stage("Stage 1").jobs(
-                                new Job("Job Name", "JOBKEY")
-                                        .tasks(
-                                                gitRepositoryCheckoutTask(),
-                                                scriptTask()
-                                        )
-                                        .artifacts(artifact())
+            project(),
+            "STREACS Atlassian Jira Software", "B4FE7A")
+            .enabled(true)
+            .linkedRepositories("DCK - STREACS Atlassian Jira Software (master)")
+            .planBranchManagement(new PlanBranchManagement()
+                .createForVcsBranchMatching("^feature/.*|^release/.*|^develop")
+                .triggerBuildsLikeParentPlan())
+            .description("Plan created from (https://scm.streacs.com/projects/DCK/repos/streacs_atlassian_jira_software)")
+            .triggers(
+                new ScheduledTrigger()
+                    .description("Nightly Build")
+                    .enabled(true)
+                    .scheduleOnceDaily(LocalTime.of(00, 00)),
+                new BitbucketServerTrigger()
+                    .name("Bitbucket Server repository triggered")
+                    .description("Commit Trigger")
+            )
+            .stages(
+                new Stage("STAGE_01").jobs(
+                    new Job("Default Job", "D43AA6")
+                        .requirements(new Requirement("system.docker.executable"))
+                        .tasks(
+                            scriptTask()
                         )
-                );
-    }
-
-    VcsRepository gitRepository() {
-        return new GitRepository()
-                .name("your-git-repository")
-                .url("git@bitbucket.org:your-company/your-repository.git")
-                .branch("master");
-    }
-
-    VcsCheckoutTask gitRepositoryCheckoutTask() {
-        return new VcsCheckoutTask()
-                .addCheckoutOfDefaultRepository();
+                        .tasks(
+                            checkoutTask()
+                        )
+                        .tasks(
+                            buildTask()
+                        )
+                )
+            );
     }
 
     ScriptTask scriptTask() {
         return new ScriptTask()
-                .inlineBody("mkdir target; echo 'hello world' > target/console.out")
-                .interpreterShell();
+            .inlineBody("echo 'hello world'")
+            .interpreterShell();
     }
 
-    Artifact artifact() {
-        return new Artifact("Build results")
-                .location("target")
-                .copyPattern("**/*");
+    VcsCheckoutTask checkoutTask() {
+        return new VcsCheckoutTask()
+            .description("Checkout Repository")
+            .checkoutItems(new CheckoutItem()
+                .repository(new VcsRepositoryIdentifier()
+                    .name("DCK - STREACS Atlassian Jira Software (master)")
+                )
+            );
+    }
+
+    ScriptTask buildTask() {
+        return new ScriptTask()
+            .description("Build Docker container")
+            .location(ScriptTaskProperties.Location.FILE)
+            .fileFromPath("Buildfile")
+            .argument("test");
     }
 
 }

@@ -14,6 +14,9 @@ ENV JAVA_VERSION_PATH=aa0333dd3019491ca4f6ddbe78cdb6d0
 
 ENV JAVA_HOME=/opt/jdk
 
+ENV SYSTEM_USER jira
+ENV SYSTEM_GROUP jira
+
 ENV DEBIAN_FRONTEND noninteractive
 
 RUN set -x \
@@ -26,6 +29,10 @@ RUN set -x \
   && tar xfz /tmp/jdk-${JAVA_VERSION_MAJOR}u${JAVA_VERSION_MINOR}-linux-x64.tar.gz --strip-components=1 -C ${JAVA_HOME} \
   && update-alternatives --install /usr/bin/java java ${JAVA_HOME}/bin/java 1 \
   && rm /tmp/jdk-${JAVA_VERSION_MAJOR}u${JAVA_VERSION_MINOR}-linux-x64.tar.gz
+
+RUN set -x \
+  && addgroup --system ${SYSTEM_GROUP} \
+  && adduser --system --ingroup ${SYSTEM_GROUP} ${SYSTEM_USER}
 
 RUN set -x \
   && apt-get clean \

@@ -7,6 +7,8 @@ FROM debian:stretch-slim
 
 MAINTAINER Oliver Wolf <root@streacs.com>
 
+ARG APPLICATION_RELEASE
+
 ENV JAVA_VERSION_MAJOR=8
 ENV JAVA_VERSION_MINOR=152
 ENV JAVA_VERSION_BUILD=16
@@ -39,7 +41,12 @@ RUN set -x \
 
 RUN set -x \
   && mkdir -p ${APPLICATION_INST} \
-  && mkdir -p ${APPLICATION_HOME}
+  && mkdir -p ${APPLICATION_HOME} \
+  && wget --no-check-certificate -nv -O /tmp/atlassian-jira-software-${APPLICATION_RELEASE}.tar.gz https://www.atlassian.com/software/jira/downloads/binary/atlassian-jira-software-${APPLICATION_RELEASE}.tar.gz \
+  && tar xfz /tmp/atlassian-jira-software-${APPLICATION_RELEASE}.tar.gz --strip-components=1 -C ${APPLICATION_INST} \
+  && chown -R ${SYSTEM_USER}:${SYSTEM_GROUP} ${APPLICATION_INST} \
+  && chown -R ${SYSTEM_USER}:${SYSTEM_GROUP} ${APPLICATION_HOME} \
+  && rm /tmp/atlassian-jira-software-${APPLICATION_RELEASE}.tar.gz
 
 RUN set -x \
   && apt-get clean \

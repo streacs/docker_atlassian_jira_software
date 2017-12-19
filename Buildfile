@@ -3,8 +3,11 @@
 DOCKER_REPOSITORY="streacs"
 APPLICATION_NAME="atlassian-jira-software"
 
+APPLICATION_RSS="https://my.atlassian.com/download/feeds/jira-software.rss"
+
 function build_container {
-      docker build --no-cache -t ${DOCKER_REPOSITORY}/${APPLICATION_NAME}:latest .
+      APPLICATION_RELEASE="$(wget -qO- ${APPLICATION_RSS} | grep -o -E "(\d{1,2}\.){2,3}\d" | uniq)"
+      docker build --no-cache --build-arg APPLICATION_RELEASE=${APPLICATION_RELEASE} -t ${DOCKER_REPOSITORY}/${APPLICATION_NAME}:latest .
 }
 
 function remove_container {

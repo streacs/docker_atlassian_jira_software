@@ -14,6 +14,9 @@ ENV JAVA_VERSION_PATH=aa0333dd3019491ca4f6ddbe78cdb6d0
 
 ENV JAVA_HOME=/opt/jdk
 
+ENV APPLICATION_INST /opt/atlassian/jira
+ENV APPLICATION_HOME /var/opt/atlassian/application-data/jira
+
 ENV SYSTEM_USER jira
 ENV SYSTEM_GROUP jira
 
@@ -33,6 +36,10 @@ RUN set -x \
 RUN set -x \
   && addgroup --system ${SYSTEM_GROUP} \
   && adduser --system --ingroup ${SYSTEM_GROUP} ${SYSTEM_USER}
+
+RUN set -x \
+  && mkdir -p ${APPLICATION_INST} \
+  && mkdir -p ${APPLICATION_HOME}
 
 RUN set -x \
   && apt-get clean \

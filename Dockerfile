@@ -54,10 +54,13 @@ RUN set -x \
   && rm -rf /tmp/*
 
 ADD files/service /usr/local/bin/service
+ADD files/entrypoint /usr/local/bin/entrypoint
 
 VOLUME ${APPLICATION_HOME}
 
 EXPOSE 8080
+
+ENTRYPOINT ["/usr/local/bin/entrypoint"]
 
 USER ${SYSTEM_USER}
 

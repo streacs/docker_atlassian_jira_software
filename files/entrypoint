@@ -1,1 +1,7 @@
 #!/bin/bash
+
+if [ "$(stat -c "%Y" "${APPLICATION_INST}/atlassian-jira/WEB-INF/classes/jira-application.properties")" -eq "0" ]; then
+  sed --in-place "s~jira.home =~jira.home=$APPLICATION_HOME~" ${APPLICATION_INST}/atlassian-jira/WEB-INF/classes/jira-application.properties
+fi
+
+exec "$@"

@@ -53,6 +53,9 @@ RUN set -x \
   && rm -rf /var/cache/* \
   && rm -rf /tmp/*
 
+RUN set -x \
+  && touch -d "@0" "${APPLICATION_INST}/atlassian-jira/WEB-INF/classes/jira-application.properties"
+
 ADD files/service /usr/local/bin/service
 ADD files/entrypoint /usr/local/bin/entrypoint
 

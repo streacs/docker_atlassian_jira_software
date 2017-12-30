@@ -38,17 +38,17 @@ function build_container {
 function test_container {
   case $APPLICATION_BRANCH in
     master)
-      docker run -ti --rm --env-file files/environment.list ${DOCKER_REPOSITORY}/${APPLICATION_NAME}:master rake spec /home/jira/spec
+      docker run -t --rm --env-file files/environment.list ${DOCKER_REPOSITORY}/${APPLICATION_NAME}:master rake spec /home/jira/spec
     ;;
     develop)
-      docker run -ti --rm --env-file files/environment.list ${DOCKER_REPOSITORY}/${APPLICATION_NAME}:develop rake spec /home/jira/spec
+      docker run -t --rm --env-file files/environment.list ${DOCKER_REPOSITORY}/${APPLICATION_NAME}:develop rake spec /home/jira/spec
     ;;
     release*)
       APPLICATION_RELEASE="$(git symbolic-ref --short HEAD | grep -o -E "(\d{1,2}\.){2,3}\d")"
-      docker run -ti --rm --env-file files/environment.list ${DOCKER_REPOSITORY}/${APPLICATION_NAME}:${APPLICATION_RELEASE} rake spec /home/jira/spec
+      docker run -t --rm --env-file files/environment.list ${DOCKER_REPOSITORY}/${APPLICATION_NAME}:${APPLICATION_RELEASE} rake spec /home/jira/spec
     ;;
     feature*)
-      docker run -ti --rm --env-file files/environment.list ${DOCKER_REPOSITORY}/${APPLICATION_NAME}:feature rake spec /home/jira/spec
+      docker run -t --rm --env-file files/environment.list ${DOCKER_REPOSITORY}/${APPLICATION_NAME}:feature rake spec /home/jira/spec
     ;;
     *)
       echo "No match found"

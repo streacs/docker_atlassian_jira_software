@@ -87,7 +87,9 @@ case $1 in
     build_container
   ;;
   test)
+    build_container
     test_container
+    remove_container
   ;;
   remove)
     remove_container

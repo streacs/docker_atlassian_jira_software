@@ -1,0 +1,43 @@
+#!/bin/bash
+
+if [ "$(stat -c "%Y" "${APPLICATION_INST}/atlassian-jira/WEB-INF/classes/jira-application.properties")" -eq "0" ]; then
+  sed --in-place "s~jira.home =~jira.home=$APPLICATION_HOME~" ${APPLICATION_INST}/atlassian-jira/WEB-INF/classes/jira-application.properties
+fi
+
+if [ "$(stat -c "%Y" "${APPLICATION_INST}/bin/setenv.sh")" -eq "0" ];
+  then
+    if [ -n "${JVM_MEMORY_MIN}" ];
+      then
+        sed --in-place "s~JVM_MINIMUM_MEMORY=\".*\"~JVM_MINIMUM_MEMORY=\"${JVM_MEMORY_MIN}\"~" ${APPLICATION_INST}/bin/setenv.sh
+    fi
+    if [ -n "${JVM_MEMORY_MAX}" ];
+      then
+        sed --in-place "s~JVM_MAXIMUM_MEMORY=\".*\"~JVM_MAXIMUM_MEMORY=\"${JVM_MEMORY_MAX}\"~" ${APPLICATION_INST}/bin/setenv.sh
+    fi
+    if [ -n "${JVM_ARGUMENTS}" ];
+      then
+        sed --in-place "s~JVM_SUPPORT_RECOMMENDED_ARGS=\"\"~JVM_SUPPORT_RECOMMENDED_ARGS=\"${JVM_ARGUMENTS}\"~" ${APPLICATION_INST}/bin/setenv.sh
+    fi
+fi
+
+if [ "$(stat -c "%Y" "${APPLICATION_INST}/conf/server.xml")" -eq "0" ];
+  then
+    if [ -n "${TOMCAT_PROXY_NAME}" ];
+      then
+        xmlstarlet ed --inplace --insert '//Connector[@port="8080"]' --type "attr" --name "proxyName" --value "${TOMCAT_PROXY_NAME}" "${APPLICATION_INST}/conf/server.xml"
+    fi
+    if [ -n "${TOMCAT_PROXY_PORT}" ];
+      then
+        xmlstarlet ed --inplace --insert '//Connector[@port="8080"]' --type "attr" --name "proxyPort" --value "${TOMCAT_PROXY_PORT}" "${APPLICATION_INST}/conf/server.xml"
+    fi
+    if [ -n "${TOMCAT_PROXY_SCHEME}" ];
+      then
+        xmlstarlet ed --inplace --insert '//Connector[@port="8080"]' --type "attr" --name "scheme" --value "${TOMCAT_PROXY_SCHEME}" "${APPLICATION_INST}/conf/server.xml"
+    fi
+    if [ -n "${TOMCAT_PROXY_SECURE}" ];
+      then
+        xmlstarlet ed --inplace --insert '//Connector[@port="8080"]' --type "attr" --name "secure" --value "${TOMCAT_PROXY_SECURE}" "${APPLICATION_INST}/conf/server.xml"
+    fi
+fi
+
+exec "$@"

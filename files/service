@@ -1,0 +1,10 @@
+#!/bin/bash
+
+if [[ $ORACLE_JAVA_EULA == *"accepted"* ]];
+  then
+    ${APPLICATION_INST}/bin/start-jira.sh -fg
+  else
+    echo "##   You have to accept the Oracle end user license agreement    ##"
+    echo "## Please add -e ORACLE_JAVA_EULA=accepted to your configuration ##"
+    exit 1
+fi

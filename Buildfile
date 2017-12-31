@@ -25,9 +25,10 @@ function build_container {
       docker build --no-cache -t ${DOCKER_REPOSITORY}/${APPLICATION_NAME}:${APPLICATION_RELEASE} --build-arg APPLICATION_RELEASE=${APPLICATION_RELEASE} .
     ;;
     feature*)
+      GIT_HASH="$(git rev-parse --short HEAD)"
       APPLICATION_RELEASE="$(wget -qO- ${APPLICATION_RSS} | grep -o -E "(\d{1,2}\.){2,3}\d" | uniq)"
       echo "Building FEATURE with BRANCH $APPLICATION_BRANCH and RELEASE $APPLICATION_RELEASE"
-      docker build --no-cache -t ${DOCKER_REPOSITORY}/${APPLICATION_NAME}:feature --build-arg APPLICATION_RELEASE=${APPLICATION_RELEASE} .
+      docker build --no-cache -t ${DOCKER_REPOSITORY}/${APPLICATION_NAME}:feature-${GIT_HASH} --build-arg APPLICATION_RELEASE=${APPLICATION_RELEASE} .
     ;;
     *)
       echo "No match found"
@@ -48,7 +49,8 @@ function test_container {
       docker run -t --rm --env-file files/environment.list ${DOCKER_REPOSITORY}/${APPLICATION_NAME}:${APPLICATION_RELEASE} rake spec /home/jira/spec
     ;;
     feature*)
-      docker run -t --rm --env-file files/environment.list ${DOCKER_REPOSITORY}/${APPLICATION_NAME}:feature rake spec /home/jira/spec
+      GIT_HASH="$(git rev-parse --short HEAD)"
+      docker run -t --rm --env-file files/environment.list ${DOCKER_REPOSITORY}/${APPLICATION_NAME}:feature-${GIT_HASH} rake spec /home/jira/spec
     ;;
     *)
       echo "No match found"
@@ -69,7 +71,8 @@ function remove_container {
       docker rmi ${DOCKER_REPOSITORY}/${APPLICATION_NAME}:${APPLICATION_RELEASE}
     ;;
     feature*)
-      docker rmi ${DOCKER_REPOSITORY}/${APPLICATION_NAME}:feature
+      GIT_HASH="$(git rev-parse --short HEAD)"
+      docker rmi ${DOCKER_REPOSITORY}/${APPLICATION_NAME}:feature-${GIT_HASH}
     ;;
     *)
       echo "No match found"

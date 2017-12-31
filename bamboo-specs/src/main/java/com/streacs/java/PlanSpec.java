@@ -88,9 +88,6 @@ public class PlanSpec {
                     new Job("Default Job", "D43AA6")
                         .requirements(new Requirement("system.docker.executable"))
                         .tasks(
-                            scriptTask()
-                        )
-                        .tasks(
                             checkoutTask()
                         )
                         .tasks(
@@ -98,12 +95,6 @@ public class PlanSpec {
                         )
                 )
             );
-    }
-
-    ScriptTask scriptTask() {
-        return new ScriptTask()
-            .inlineBody("echo 'hello world'")
-            .interpreterShell();
     }
 
     VcsCheckoutTask checkoutTask() {

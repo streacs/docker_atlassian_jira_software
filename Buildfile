@@ -11,23 +11,23 @@ function build_container {
   case $APPLICATION_BRANCH in
     master)
       APPLICATION_RELEASE="$(wget -qO- ${APPLICATION_RSS} | grep -o -E "(\d{1,2}\.){2,3}\d" | uniq)"
-      echo "Building MASTER with RELEASE $APPLICATION_RELEASE"
+      echo "Building MASTER (${GIT_HASH}) with RELEASE $APPLICATION_RELEASE"
       docker build --no-cache -t ${DOCKER_REPOSITORY}/${APPLICATION_NAME}:master --build-arg APPLICATION_RELEASE=${APPLICATION_RELEASE} .
     ;;
     develop)
       APPLICATION_RELEASE="$(wget -qO- ${APPLICATION_RSS} | grep -o -E "(\d{1,2}\.){2,3}\d" | uniq)"
-      echo "Building DEVELOP with RELEASE $APPLICATION_RELEASE"
+      echo "Building DEVELOP (${GIT_HASH}) with RELEASE $APPLICATION_RELEASE"
       docker build --no-cache -t ${DOCKER_REPOSITORY}/${APPLICATION_NAME}:develop --build-arg APPLICATION_RELEASE=${APPLICATION_RELEASE} .
     ;;
     release*)
       APPLICATION_RELEASE="$(git symbolic-ref --short HEAD | grep -o -E "(\d{1,2}\.){2,3}\d")"
-      echo "Building RELEASE with RELEASE $APPLICATION_RELEASE"
+      echo "Building RELEASE (${GIT_HASH}) with RELEASE $APPLICATION_RELEASE"
       docker build --no-cache -t ${DOCKER_REPOSITORY}/${APPLICATION_NAME}:${APPLICATION_RELEASE} --build-arg APPLICATION_RELEASE=${APPLICATION_RELEASE} .
     ;;
     feature*)
       GIT_HASH="$(git rev-parse --short HEAD)"
       APPLICATION_RELEASE="$(wget -qO- ${APPLICATION_RSS} | grep -o -E "(\d{1,2}\.){2,3}\d" | uniq)"
-      echo "Building FEATURE with BRANCH $APPLICATION_BRANCH and RELEASE $APPLICATION_RELEASE"
+      echo "Building FEATURE (${GIT_HASH}) with BRANCH $APPLICATION_BRANCH and RELEASE $APPLICATION_RELEASE"
       docker build --no-cache -t ${DOCKER_REPOSITORY}/${APPLICATION_NAME}:feature-${GIT_HASH} --build-arg APPLICATION_RELEASE=${APPLICATION_RELEASE} .
     ;;
     *)

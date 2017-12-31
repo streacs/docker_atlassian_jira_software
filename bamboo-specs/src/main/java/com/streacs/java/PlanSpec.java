@@ -3,6 +3,7 @@ package com.streacs.java;
 import com.atlassian.bamboo.specs.api.BambooSpec;
 import com.atlassian.bamboo.specs.api.builders.plan.Plan;
 import com.atlassian.bamboo.specs.api.builders.plan.PlanIdentifier;
+import com.atlassian.bamboo.specs.api.builders.plan.branches.BranchCleanup;
 import com.atlassian.bamboo.specs.api.builders.plan.branches.PlanBranchManagement;
 import com.atlassian.bamboo.specs.api.builders.project.Project;
 import com.atlassian.bamboo.specs.api.builders.repository.VcsRepositoryIdentifier;
@@ -69,7 +70,9 @@ public class PlanSpec {
             .linkedRepositories("DCK - STREACS Atlassian Jira Software (master)")
             .planBranchManagement(new PlanBranchManagement()
                 .createForVcsBranchMatching("^feature/.*|^release/.*|^develop")
-                .triggerBuildsLikeParentPlan())
+                .triggerBuildsLikeParentPlan()
+                .delete(new BranchCleanup()
+                    .whenInactiveInRepositoryAfterDays(5)))
             .description("Plan created from (https://scm.streacs.com/projects/DCK/repos/streacs_atlassian_jira_software)")
             .triggers(
                 new ScheduledTrigger()
@@ -85,9 +88,6 @@ public class PlanSpec {
                     new Job("Default Job", "D43AA6")
                         .requirements(new Requirement("system.docker.executable"))
                         .tasks(
-                            scriptTask()
-                        )
-                        .tasks(
                             checkoutTask()
                         )
                         .tasks(
@@ -95,12 +95,6 @@ public class PlanSpec {
                         )
                 )
             );
-    }
-
-    ScriptTask scriptTask() {
-        return new ScriptTask()
-            .inlineBody("echo 'hello world'")
-            .interpreterShell();
     }
 
     VcsCheckoutTask checkoutTask() {

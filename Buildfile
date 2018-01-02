@@ -90,10 +90,10 @@ function remove_container {
 function deploy_container {
   case $APPLICATION_BRANCH in
     master)
-      echo "Nothing to do"
+      docker push ${DOCKER_REPOSITORY}/${APPLICATION_NAME}:master
     ;;
     develop)
-      echo "Nothing to do"
+      docker push ${DOCKER_REPOSITORY}/${APPLICATION_NAME}:develop
     ;;
     release*)
       APPLICATION_RELEASE="$(git symbolic-ref --short HEAD | grep -o -E "(\d{1,2}\.){2,3}\d")"

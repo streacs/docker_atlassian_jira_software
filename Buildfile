@@ -7,6 +7,10 @@ APPLICATION_RSS="https://my.atlassian.com/download/feeds/jira-software.rss"
 
 APPLICATION_BRANCH="$(git symbolic-ref --short HEAD)"
 
+function docker_signin {
+  docker login -u $bamboo_docker_username -p $bamboo_docker_password
+}
+
 function build_container {
   case $APPLICATION_BRANCH in
     master)
@@ -83,19 +87,44 @@ function remove_container {
   esac
 }
 
+function deploy_container {
+  case $APPLICATION_BRANCH in
+    master)
+      echo "Nothing to do"
+    ;;
+    develop)
+      echo "Nothing to do"
+    ;;
+    release*)
+      APPLICATION_RELEASE="$(git symbolic-ref --short HEAD | grep -o -E "(\d{1,2}\.){2,3}\d")"
+      docker push ${DOCKER_REPOSITORY}/${APPLICATION_NAME}:${APPLICATION_RELEASE}
+    ;;
+    feature*)
+      echo "Nothing to do"
+    ;;
+    *)
+      echo "No match found"
+    ;;
+  esac
+}
+
 case $1 in
   package)
     build_container
     test_container
+    docker_signin
+    deploy_container
     remove_container
   ;;
   build)
     build_container
   ;;
   test)
-    build_container
     test_container
-    remove_container
+  ;;
+  deploy)
+    docker_signin
+    deploy_container
   ;;
   remove)
     remove_container

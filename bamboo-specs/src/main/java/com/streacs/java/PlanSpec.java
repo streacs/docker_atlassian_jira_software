@@ -93,6 +93,15 @@ public class PlanSpec {
                         .tasks(
                             buildTask()
                         )
+                        .tasks(
+                            testTask()
+                        )
+                        .tasks(
+                            deployTask()
+                        )
+                        .tasks(
+                            cleanTask()
+                        )
                 )
             );
     }
@@ -112,7 +121,29 @@ public class PlanSpec {
             .description("Build Docker container")
             .location(ScriptTaskProperties.Location.FILE)
             .fileFromPath("Buildfile")
+            .argument("build");
+    }
+
+    ScriptTask testTask() {
+        return new ScriptTask()
+            .description("Build Docker container")
+            .location(ScriptTaskProperties.Location.FILE)
+            .fileFromPath("Buildfile")
             .argument("test");
+    }
+    ScriptTask deployTask() {
+        return new ScriptTask()
+            .description("Build Docker container")
+            .location(ScriptTaskProperties.Location.FILE)
+            .fileFromPath("Buildfile")
+            .argument("deploy");
+    }
+    ScriptTask cleanTask() {
+        return new ScriptTask()
+            .description("Build Docker container")
+            .location(ScriptTaskProperties.Location.FILE)
+            .fileFromPath("Buildfile")
+            .argument("clean");
     }
 
 }

@@ -67,6 +67,7 @@ public class PlanSpec {
             project(),
             "STREACS Atlassian Jira Software", "B4FE7A")
             .enabled(true)
+            .noPluginConfigurations()
             .noNotifications()
             .linkedRepositories("DCK - STREACS Atlassian Jira Software (master)")
             .planBranchManagement(new PlanBranchManagement()

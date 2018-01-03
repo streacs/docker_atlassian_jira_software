@@ -62,6 +62,7 @@ RUN set -x \
 
 ADD files/service /usr/local/bin/service
 ADD files/entrypoint /usr/local/bin/entrypoint
+ADD files/healthcheck /usr/local/bin/healthcheck
 ADD rspec-specs ${SYSTEM_HOME}/
 
 VOLUME ${APPLICATION_HOME}
@@ -73,5 +74,7 @@ ENTRYPOINT ["/usr/local/bin/entrypoint"]
 USER ${SYSTEM_USER}
 
 WORKDIR ${SYSTEM_HOME}
+
+HEALTHCHECK --interval=5s --timeout=3s CMD /usr/local/bin/healthcheck
 
 CMD ["/usr/local/bin/service"]

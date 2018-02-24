@@ -27,7 +27,7 @@ function build_container {
     ;;
     release*)
       GIT_HASH="$(git rev-parse --short HEAD)"
-      APPLICATION_RELEASE="$(git symbolic-ref --short HEAD | grep -o -E "(\d{1,2}\.){2,3}\d")"
+      APPLICATION_RELEASE="7.7.2"
       echo "Building RELEASE (${GIT_HASH}) with RELEASE $APPLICATION_RELEASE"
       docker build --no-cache -t ${DOCKER_REPOSITORY}/${APPLICATION_NAME}:${APPLICATION_RELEASE} --build-arg APPLICATION_RELEASE=${APPLICATION_RELEASE} .
     ;;

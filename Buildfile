@@ -17,7 +17,7 @@ function build_container {
       GIT_HASH="$(git rev-parse --short HEAD)"
       APPLICATION_RELEASE="$(wget -qO- ${APPLICATION_RSS} | grep -o -E "(\d{1,2}\.){2,3}\d" | uniq)"
       echo "Building MASTER (${GIT_HASH}) with RELEASE $APPLICATION_RELEASE"
-      docker build --no-cache -t ${DOCKER_REPOSITORY}/${APPLICATION_NAME}:master --build-arg APPLICATION_RELEASE=${APPLICATION_RELEASE} .
+      docker build --no-cache -t ${DOCKER_REPOSITORY}/${APPLICATION_NAME}:master -t ${DOCKER_REPOSITORY}/${APPLICATION_NAME}:${APPLICATION_RELEASE} --build-arg APPLICATION_RELEASE=${APPLICATION_RELEASE} .
     ;;
     develop)
       GIT_HASH="$(git rev-parse --short HEAD)"
@@ -68,7 +68,9 @@ function test_container {
 function remove_container {
   case $APPLICATION_BRANCH in
     master)
+      APPLICATION_RELEASE="$(wget -qO- ${APPLICATION_RSS} | grep -o -E "(\d{1,2}\.){2,3}\d" | uniq)"
       docker rmi ${DOCKER_REPOSITORY}/${APPLICATION_NAME}:master
+      docker rmi ${DOCKER_REPOSITORY}/${APPLICATION_NAME}:${APPLICATION_RELEASE}
     ;;
     develop)
       docker rmi ${DOCKER_REPOSITORY}/${APPLICATION_NAME}:develop
@@ -90,7 +92,9 @@ function remove_container {
 function deploy_container {
   case $APPLICATION_BRANCH in
     master)
+      APPLICATION_RELEASE="$(wget -qO- ${APPLICATION_RSS} | grep -o -E "(\d{1,2}\.){2,3}\d" | uniq)"
       docker push ${DOCKER_REPOSITORY}/${APPLICATION_NAME}:master
+      docker push ${DOCKER_REPOSITORY}/${APPLICATION_NAME}:${APPLICATION_RELEASE}
     ;;
     develop)
       docker push ${DOCKER_REPOSITORY}/${APPLICATION_NAME}:develop
